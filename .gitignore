@@ -1,0 +1,16 @@
+Set-Content .gitignore "venv/
+data/
+notebooks/
+COLAB_*.ipynb
+app/
+src/train.py
+src/evaluate.py
+src/dataset.py
+prepare_dataset.py
+optimize_model.py
+docker-compose.yml
+api/Dockerfile
+__pycache__/
+*.pyc
+.DS_Store
+.vscode/"
