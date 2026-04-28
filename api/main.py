@@ -73,7 +73,6 @@ class_names = None
 model_loaded = False
 startup_time = None
 
-
 @app.on_event("startup")
 async def startup_event():
     global _model, _device, _class_names, _model_loaded, _startup_time
@@ -91,20 +90,16 @@ async def startup_event():
         from config import NUM_CLASSES, DROPOUT
 
         checkpoint = torch.load(MODEL_PATH, map_location=_device)
-
-        # ✅ weights=None : évite le téléchargement ImageNet (économise 300MB RAM)
         model = build_model(freeze_backbone=False)
         model.load_state_dict(checkpoint["model_state_dict"])
         model.eval()
-
         _model = model
         _model_loaded = True
         logger.info(f"Modèle chargé | Classes : {_class_names}")
 
     except Exception as e:
-        logger.warning(f"Modèle non chargé : {e}")
+        logger.error(f"Erreur chargement modèle : {e}")
         _model_loaded = False
-
 # ─────────────────────────────────────────────────────────────
 # ROUTES
 # ─────────────────────────────────────────────────────────────
