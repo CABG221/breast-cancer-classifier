@@ -76,27 +76,34 @@ startup_time = None
 
 @app.on_event("startup")
 async def startup_event():
-    global model, device, class_names, model_loaded, startup_time
-    startup_time = time.time()
-    device = get_device()
-    logger.info(f"Device : {device}")
-
-    try:
-        model = load_model(MODEL_PATH, device)
-        model_loaded = True
-        logger.info(f"Modèle chargé depuis {MODEL_PATH}")
-    except FileNotFoundError:
-        logger.warning(f"Modèle non trouvé : {MODEL_PATH}. Lance d'abord l'entraînement.")
-        model_loaded = False
+    global _model, _device, _class_names, _model_loaded, _startup_time
+    _startup_time = time.time()
+    _device = torch.device("cpu")
 
     if CLASS_NAMES_PATH.exists():
         with open(CLASS_NAMES_PATH) as f:
-            class_names = json.load(f)
+            _class_names = json.load(f)
     else:
-        class_names = ["Benign", "Malignant"]
+        _class_names = ["Benign", "Malignant"]
 
-    logger.info(f"Classes : {class_names}")
+    try:
+        from src.model import build_model
+        from config import NUM_CLASSES, DROPOUT
 
+        checkpoint = torch.load(MODEL_PATH, map_location=_device)
+
+        # ✅ weights=None : évite le téléchargement ImageNet (économise 300MB RAM)
+        model = build_model(freeze_backbone=False)
+        model.load_state_dict(checkpoint["model_state_dict"])
+        model.eval()
+
+        _model = model
+        _model_loaded = True
+        logger.info(f"Modèle chargé | Classes : {_class_names}")
+
+    except Exception as e:
+        logger.warning(f"Modèle non chargé : {e}")
+        _model_loaded = False
 
 # ─────────────────────────────────────────────────────────────
 # ROUTES

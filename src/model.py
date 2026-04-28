@@ -39,7 +39,7 @@ def build_model(
         Modèle PyTorch prêt à l'entraînement
     """
     # Chargement des poids ImageNet (transfer learning)
-    model = efficientnet_b3(weights=EfficientNet_B3_Weights.DEFAULT)
+    model = efficientnet_b3(weights=None)
 
     # ── Gel du backbone ──────────────────────────────────────
     if freeze_backbone:
